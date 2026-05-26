@@ -3,65 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Finance Tracker</title>
+    <title>Income and Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>? Smart Finance Tracker</h1>
+    <div class="app-container">
         
-        <div class="balance-board">
-            <div class="card">
-                <h3>Current Balance</h3>
-                <p id="balance">0 KGS</p>
-            </div>
-            <div class="card income">
-                <h3>Total Income</h3>
-                <p id="money-plus">+0 KGS</p>
-            </div>
-            <div class="card expense">
-                <h3>Total Expenses</h3>
-                <p id="money-minus">-0 KGS</p>
-            </div>
-        </div>
-
-        <div class="chart-container" id="chart-card" style="display: none;">
-            <h3>Expense Analytics</h3>
-            <canvas id="expenseChart"></canvas>
-        </div>
-
-        <div class="form-container">
-            <h3>Add New Transaction</h3>
-            <form id="form">
-                <div class="form-control">
-                    <label for="type">Transaction Type</label>
-                    <select id="type" required>
-                        <option value="expense">? Expense</option>
-                        <option value="income">? Income</option>
-                    </select>
+        <aside class="sidebar">
+            <div class="logo-area">
+                <span class="logo-icon">??</span>
+                <div>
+                    <h2>Income and Expense Tracker</h2>
+                    <p>Take control of your finances</p>
                 </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar">?</div>
+                <h3>Welcome!</h3>
+            </div>
+            
+            <nav class="navigation">
+                <a href="#" class="nav-item active"><span>?</span> Dashboard</a>
+                <a href="#" class="nav-item"><span>?</span> Transactions</a>
+                <a href="#" class="nav-item"><span>?</span> Budgets</a>
+                <a href="#" class="nav-item"><span>?</span> Reports</a>
+                <a href="#" class="nav-item"><span>?</span> Savings Goals</a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="export-btn" id="exportBtn"><span>?</span> Export Data</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Balance</h3>
+                    <p class="amount" id="balance">$0.00</p>
+                    <span class="subtext trend" id="balance-trend">? 0% from last month</span>
+                </div>
+                <div class="metric-card">
+                    <h3>Monthly Income</h3>
+                    <p class="amount income-text" id="money-plus">+$0.00</p>
+                    <span class="subtext">? This month</span>
+                </div>
+                <div class="metric-card">
+                    <h3>Monthly Expenses</h3>
+                    <p class="amount expense-text" id="money-minus">-$0.00</p>
+                    <span class="subtext">? This month</span>
+                </div>
+                <div class="metric-card">
+                    <h3>Savings Rate</h3>
+                    <p class="amount savings-text" id="savings-rate">0.0%</p>
+                    <span class="subtext">% Of income</span>
+                </div>
+            </section>
+
+            <section class="charts-and-form-grid">
                 
-                <div class="form-control">
-                    <label for="category">Category</label>
-                    <select id="category" required>
-                        </select>
+                <div class="content-card">
+                    <h3>Spending by Category</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
                 </div>
 
-                <div class="form-control">
-                    <label for="amount">Amount (KGS)</label>
-                    <input type="number" id="amount" placeholder="Enter amount..." min="1" required />
+                <div class="content-card">
+                    <h3>Monthly Overview</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
                 </div>
-                
-                <button class="btn">Add Transaction</button>
-            </form>
-        </div>
 
-        <div id="alert-box" class="alert" style="display: none;"></div>
+                <div class="content-card form-card">
+                    <h3>Add New Transaction</h3>
+                    <form id="transaction-form">
+                        <div class="form-group">
+                            <label for="type">Type</label>
+                            <select id="type" required>
+                                <option value="expense">📉 Expense</option>
+                                <option value="income">📈 Income</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount ($)</label>
+                            <input type="number" id="amount" placeholder="e.g. 150" min="0.01" step="0.01" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Add to Dashboard</button>
+                    </form>
+                    <div id="alert-box" class="alert-message" style="display: none;"></div>
+                </div>
 
-        <h3>Transaction History</h3>
-        <ul id="list" class="list">
-            </ul>
+                <div class="content-card history-card">
+                    <h3>Recent Transactions</h3>
+                    <ul class="transaction-list" id="transaction-list">
+                        </ul>
+                </div>
+
+            </section>
+        </main>
     </div>
 
     <script src="script.js"></script>
