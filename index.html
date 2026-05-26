@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Finance Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>? Smart Finance Tracker</h1>
+        
+        <div class="balance-board">
+            <div class="card">
+                <h3>Current Balance</h3>
+                <p id="balance">0 KGS</p>
+            </div>
+            <div class="card income">
+                <h3>Total Income</h3>
+                <p id="money-plus">+0 KGS</p>
+            </div>
+            <div class="card expense">
+                <h3>Total Expenses</h3>
+                <p id="money-minus">-0 KGS</p>
+            </div>
+        </div>
+
+        <div class="chart-container" id="chart-card" style="display: none;">
+            <h3>Expense Analytics</h3>
+            <canvas id="expenseChart"></canvas>
+        </div>
+
+        <div class="form-container">
+            <h3>Add New Transaction</h3>
+            <form id="form">
+                <div class="form-control">
+                    <label for="type">Transaction Type</label>
+                    <select id="type" required>
+                        <option value="expense">? Expense</option>
+                        <option value="income">? Income</option>
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        </select>
+                </div>
+
+                <div class="form-control">
+                    <label for="amount">Amount (KGS)</label>
+                    <input type="number" id="amount" placeholder="Enter amount..." min="1" required />
+                </div>
+                
+                <button class="btn">Add Transaction</button>
+            </form>
+        </div>
+
+        <div id="alert-box" class="alert" style="display: none;"></div>
+
+        <h3>Transaction History</h3>
+        <ul id="list" class="list">
+            </ul>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
