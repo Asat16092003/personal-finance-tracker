@@ -35,18 +35,18 @@ body {
     background-color: var(--bg-card);
     border-right: 1px solid var(--border);
     display: flex;
-    flex-content: space-between;
     flex-direction: column;
+    justify-content: space-between;
     padding: 24px;
     position: fixed;
     height: 100vh;
+    z-index: 10;
 }
 
 .logo-area {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 32px;
 }
 
 .logo-icon {
@@ -66,7 +66,8 @@ body {
 
 .user-profile {
     text-align: center;
-    margin-bottom: 30px;
+    margin-top: 25px;
+    margin-bottom: 25px;
     padding: 16px;
     background: #f8fafc;
     border-radius: 12px;
@@ -77,7 +78,7 @@ body {
     height: 50px;
     background: var(--primary);
     color: white;
-    font-size: 24px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,9 +116,13 @@ body {
     color: white;
 }
 
+.sidebar-footer {
+    margin-top: auto;
+}
+
 .export-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background: none;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -128,6 +133,12 @@ body {
     justify-content: center;
     gap: 8px;
     font-weight: 500;
+    color: var(--text-main);
+    transition: background 0.2s;
+}
+
+.export-btn:hover {
+    background: #f8fafc;
 }
 
 /* MAIN CONTENT STYLES */
@@ -137,7 +148,6 @@ body {
     width: calc(100% - 260px);
 }
 
-/* Metrics Dashboard Cards Grid */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -161,7 +171,7 @@ body {
 }
 
 .metric-card .amount {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
     margin-bottom: 6px;
 }
@@ -181,7 +191,6 @@ body {
     font-weight: 500;
 }
 
-/* Charts and Layout Content Area Grid */
 .charts-and-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -206,11 +215,6 @@ body {
     position: relative;
     height: 260px;
     width: 100%;
-}
-
-/* Forms design elements */
-.form-card, .history-card {
-    grid-column: span 1;
 }
 
 .form-group {
@@ -254,7 +258,6 @@ body {
 
 .submit-btn:hover { background: var(--primary-hover); }
 
-/* System Alerts block messages */
 .alert-message {
     margin-top: 15px;
     padding: 12px;
@@ -266,7 +269,6 @@ body {
 .danger { background: #fef2f2; color: #b91c1c; border-left: 4px solid var(--expense); }
 .warning { background: #fffbeb; color: #b45309; border-left: 4px solid #f59e0b; }
 
-/* Dynamic UI Lists output history logs styles */
 .transaction-list {
     list-style: none;
     max-height: 240px;
@@ -308,6 +310,6 @@ body {
 @media (max-width: 1024px) {
     .charts-and-form-grid { grid-template-columns: 1fr; }
     .sidebar { width: 80px; padding: 12px; }
-    .logo-area div, .user-profile, .nav-item span:not(:first-child), .export-btn text { display: none; }
+    .logo-area div, .user-profile, .nav-item span:not(:first-child), .export-btn span:not(:first-child) { display: none; }
     .main-content { margin-left: 80px; width: calc(100% - 80px); }
 }
