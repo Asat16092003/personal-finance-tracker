@@ -1,200 +1,185 @@
-:root {
-    --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    --income-color: #2ecc71;
-    --expense-color: #e74c3c;
-    --primary-color: #4a90e2;
+const balanceEl = document.getElementById('balance');
+const incomeEl = document.getElementById('money-plus');
+const expenseEl = document.getElementById('money-minus');
+const savingsRateEl = document.getElementById('savings-rate');
+const form = document.getElementById('transaction-form');
+const typeSelect = document.getElementById('type');
+const categorySelect = document.getElementById('category');
+const amountInput = document.getElementById('amount');
+const listEl = document.getElementById('transaction-list');
+const alertBox = document.getElementById('alert-box');
+
+// Набор категорий
+const categories = {
+    income: [
+        { text: '💰 Salary' },
+        { text: '🎓 Scholarship' },
+        { text: '🎁 Gift' },
+        { text: '💵 Other Income' }
+    ],
+    expense: [
+        { text: '🍔 Food' },
+        { text: '🚌 Transportation' },
+        { text: '🏠 Housing' },
+        { text: '🎬 Entertainment' },
+        { text: '👕 Shopping' }
+    ]
+};
+
+let categoryChart = null;
+let overviewChart = null;
+
+// Инициализация базы данных из localStorage
+let transactions = localStorage.getItem('transactions') !== null ? JSON.parse(localStorage.getItem('transactions')) : [];
+
+// Переключение категорий в зависимости от типа
+function updateCategories() {
+    const type = typeSelect.value;
+    categorySelect.innerHTML = '';
+    categories[type].forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.text;
+        opt.innerText = cat.text;
+        categorySelect.appendChild(opt);
+    });
+}
+typeSelect.addEventListener('change', updateCategories);
+
+// Добавление новой записи
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const amt = parseFloat(amountInput.value);
+    const isExpense = typeSelect.value === 'expense';
+    
+    const transaction = {
+        id: Math.floor(Math.random() * 10000000),
+        type: typeSelect.value,
+        category: categorySelect.value,
+        amount: isExpense ? -amt : amt
+    };
+    
+    transactions.push(transaction);
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    
+    amountInput.value = '';
+    updateUI();
+});
+
+// Удаление записи
+function deleteTransaction(id) {
+    transactions = transactions.filter(t => t.id !== id);
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    updateUI();
 }
 
-body {
-    background-color: #f0f4f8;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    display: flex;
-    justify-content: center;
-    padding: 40px 20px;
-    color: #2c3e50;
-    margin: 0;
+// Пересчет баланса, процентов и обновление графиков
+function updateUI() {
+    listEl.innerHTML = '';
+    
+    let total = 0;
+    let income = 0;
+    let expense = 0;
+    
+    // Подсчет финансовых показателей
+    transactions.forEach(t => {
+        total += t.amount;
+        if (t.amount > 0) income += t.amount;
+        else expense += Math.abs(t.amount);
+        
+        // Рендеринг элементов списка в историю
+        const li = document.createElement('li');
+        li.classList.add(t.amount > 0 ? 'plus' : 'minus');
+        li.innerHTML = `
+            ${t.category} 
+            <span>${t.amount > 0 ? '+' : '-'}$${Math.abs(t.amount).toFixed(2)}</span>
+            <button class="delete-btn" onclick="deleteTransaction(${t.id})">x</button>
+        `;
+        listEl.appendChild(li);
+    });
+    
+    // Расчет Savings Rate (% Сбережений)
+    let savingsRate = 0;
+    if (income > 0) {
+        savingsRate = ((income - expense) / income) * 100;
+        if (savingsRate < 0) savingsRate = 0; 
+    }
+    
+    // Вывод цифр на дашборд
+    balanceEl.innerText = `$${total.toFixed(2)}`;
+    incomeEl.innerText = `+$${income.toFixed(2)}`;
+    expenseEl.innerText = `-$${expense.toFixed(2)}`;
+    savingsRateEl.innerText = `${savingsRate.toFixed(1)}%`;
+    
+    // Логика предупреждений
+    if (total < 0) {
+        alertBox.style.display = 'block';
+        alertBox.className = 'alert-message danger';
+        alertBox.innerText = '⚠️ Deficit detected! Budget optimization highly advised.';
+    } else if (income > 0 && expense > income * 0.8) {
+        alertBox.style.display = 'block';
+        alertBox.className = 'alert-message warning';
+        alertBox.innerText = '⚠️ Notice: Expenses crossed 80% threshold of your income logs.';
+    } else {
+        alertBox.style.display = 'none';
+    }
+    
+    // Перерисовка графиков
+    renderCharts(income, expense);
 }
 
-.container {
-    width: 100%;
-    max-width: 480px;
+// Отрисовка двух графиков Chart.js
+function renderCharts(income, expense) {
+    // 1. ПОДГОТОВКА ДАННЫХ ДЛЯ КРУГОВОГО ГРАФИКА РАСХОДОВ
+    const expenseData = transactions.filter(t => t.type === 'expense');
+    const categoriesMap = {};
+    
+    expenseData.forEach(t => {
+        categoriesMap[t.category] = (categoriesMap[t.category] || 0) + Math.abs(t.amount);
+    });
+    
+    const donutLabels = Object.keys(categoriesMap);
+    const donutValues = Object.values(categoriesMap);
+    
+    // Сброс старого кругового графика
+    if (categoryChart) categoryChart.destroy();
+    
+    const ctx1 = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: donutLabels.length ? donutLabels : ['No Expenses'],
+            datasets: [{
+                data: donutValues.length ? donutValues : [1],
+                backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#0ea5e9', '#a855f7', '#cbd5e1']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+    
+    // 2. СТОЛБЧАТЫЙ ГРАФИК ОБЗОРА (INCOME VS EXPENSE)
+    if (overviewChart) overviewChart.destroy();
+    
+    const ctx2 = document.getElementById('overviewChart').getContext('2d');
+    overviewChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                label: 'Monthly Analytics',
+                data: [income, expense],
+                backgroundColor: ['#0ea5e9', '#ef4444'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
 }
 
-h1 {
-    text-align: center;
-    font-size: 26px;
-    margin-bottom: 25px;
-    font-weight: 700;
-}
-
-h3 {
-    font-size: 18px;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    font-weight: 600;
-}
-
-.balance-board {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 25px;
-}
-
-.card {
-    background: #fff;
-    padding: 18px;
-    border-radius: 16px;
-    box-shadow: var(--box-shadow);
-    text-align: center;
-}
-
-.card h3 {
-    margin: 0 0 5px 0;
-    font-size: 13px;
-    color: #7f8c8d;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.card p {
-    font-size: 26px;
-    font-weight: 700;
-    margin: 0;
-}
-
-.income p { color: var(--income-color); }
-.expense p { color: var(--expense-color); }
-
-.chart-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: var(--box-shadow);
-    margin-bottom: 25px;
-    text-align: center;
-}
-
-.form-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: var(--box-shadow);
-    margin-bottom: 25px;
-}
-
-.form-container h3 {
-    margin-top: 0;
-}
-
-.form-control {
-    margin-bottom: 15px;
-}
-
-.form-control label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #34495e;
-}
-
-.form-control input, .form-control select {
-    width: 100%;
-    padding: 12px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
-    box-sizing: border-box;
-    font-size: 16px;
-    background-color: #fff;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.form-control input:focus, .form-control select:focus {
-    border-color: var(--primary-color);
-}
-
-.btn {
-    width: 100%;
-    padding: 14px;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s, transform 0.1s;
-}
-
-.btn:hover { background: #357abd; }
-.btn:active { transform: scale(0.98); }
-
-.alert {
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 25px;
-    line-height: 1.4;
-}
-.alert-danger {
-    background-color: #fde8e8;
-    color: #9b1c1c;
-    border-left: 5px solid var(--expense-color);
-}
-.alert-warning {
-    background-color: #fef08a;
-    color: #713f12;
-    border-left: 5px solid #eab308;
-}
-
-.list {
-    list-style-type: none;
-    padding: 0;
-    margin-bottom: 30px;
-}
-
-.list li {
-    background-color: #fff;
-    box-shadow: var(--box-shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    padding: 16px;
-    margin: 12px 0;
-    border-radius: 10px;
-    font-weight: 500;
-}
-
-.list li.plus { border-right: 6px solid var(--income-color); }
-.list li.minus { border-right: 6px solid var(--expense-color); }
-
-.delete-btn {
-    cursor: pointer;
-    background-color: var(--expense-color);
-    border: 0;
-    color: #fff;
-    font-size: 14px;
-    font-weight: bold;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.list li:hover .delete-btn { 
-    opacity: 1; 
-    transform: translate(-120%, -50%);
-}
+// Первоначальный запуск
+updateCategories();
+updateUI();
